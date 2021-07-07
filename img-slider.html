@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image slider</title>
+
+    <style>
+        :root {
+            --border-arrow: rgba(255, 255, 255, 0.5);
+
+        }
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .image-slider-container {
+            width: 60vw;
+            height: 60vh;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
+            border-radius: 50px;
+            box-shadow: 0px 10px 50px 0px rgba(0,0,0,0.75);
+        }
+
+        .numerotarea {
+            width: 20%;
+            height: 40px;
+            /* background-color: black; */
+            position: absolute;
+            bottom: 2%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .cerculet {
+            width: 10px;
+            height: 10px;
+            border: 1px solid black;
+            border-radius: 50%;
+        }
+
+        .fade {
+            animation: fade 1000ms 1;
+        }
+
+        .sageata {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* background-color: black; */
+            width: 80px;
+            height: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            transition: all 0.5s;
+        }
+
+        .sageata:hover {
+            box-shadow: 0px 0px 30px 0px rgba(0,0,0,0.50);
+        }
+
+        .sageata::before, .sageata::after  {
+            content: '';
+            border-radius: 50px;
+            width: 40px;
+            height: 10px;
+            position: absolute;
+        }
+
+
+        .sageata-stanga {
+            left: 2%;      
+        }
+
+        .sageata-dreapta {
+            right: 2%;
+        }
+
+        .sageata-stanga::before {
+            top: 59%;
+            transform: rotate(45deg);
+            border-bottom: 1px solid var(--border-arrow);
+            border-right: 1px solid var(--border-arrow);
+   
+        }
+
+        .sageata-stanga::after {
+            bottom: 59%;
+            transform: rotate(-45deg);
+            border-top: 1px solid var(--border-arrow);
+            border-right: 1px solid var(--border-arrow);     
+        }
+
+        .sageata-dreapta::before {
+            top: 63%;
+            transform: rotate(-45deg);
+            border-bottom: 1px solid var(--border-arrow);
+            border-left: 1px solid var(--border-arrow);
+        }
+
+        .sageata-dreapta::after {
+            bottom: 59%;
+            transform: rotate(45deg);
+            border-top: 1px solid var(--border-arrow);
+            border-left: 1px solid var(--border-arrow);
+        }
+
+        .image-slider {
+            display: flex;
+        }
+
+        img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        .prev {
+            left: -100%;
+        }
+
+        .now {
+            left: 0;
+        }
+
+        .next {
+            left: 100%;
+        }
+
+        .moveToRight {
+            animation: moveToRight 1000ms 1;    
+        }
+
+        .moveOutRight {
+            animation: moveOutRight 1000ms 1;
+        }
+
+        .moveToLeft {
+            animation: moveToLeft 1000ms 1;    
+        }
+
+        .moveOutLeft {
+            animation: moveOutLeft 1000ms 1;
+        }
+
+        @keyframes moveToRight {
+            from { left: -100%;}
+            to { left: 0;}
+        }
+
+        @keyframes moveOutRight {
+            from { left: 0;}
+            to { left: 100%;}
+        }
+
+        @keyframes moveToLeft {
+            from { left: 100%;}
+            to { left: 0;}
+        }
+
+        @keyframes moveOutLeft {
+            from { left: 0;}
+            to { left: -100%;}
+        }
+
+        @keyframes fade {
+            from { background-color: transparent;}
+            to {background-color: black;}
+        }
+
+    </style>
+
+</head>
+<body>
+
+    <div class="image-slider-container">
+
+        <div class="image-slider">
+
+            <img src="" alt="">
+            <img src="" alt="">
+            <img src="" alt="">
+
+        </div>   
+
+
+        <div class="numerotarea">
+            <div class="cerculet"></div>
+            <div class="cerculet"></div>
+            <div class="cerculet"></div>
+            <div class="cerculet"></div>
+            <div class="cerculet"></div>
+        </div>
+
+        <div class="sageata sageata-stanga"></div>
+        <div class="sageata sageata-dreapta"></div>
+
+    </div>
+
+    <script>
+        const sageataStanga = document.querySelector('.sageata-stanga');
+        const sageataDreapta = document.querySelector('.sageata-dreapta');
+
+        const cerculete = document.querySelectorAll('.cerculet');
+        const cerculeteArr = Array.from(cerculete);
+
+        const imgs = document.querySelectorAll('img');
+        var imgsArr = Array.from(imgs);
+        var cerculetIndex = 0;
+        
+
+        class Node {
+            constructor(data){
+                this.data = data;
+                this.prev = null;
+                this.next = null;
+            }
+        }
+
+        class LinkedList {
+            constructor(value) {
+                this.head = this.tail = null;
+                this.length = 1;
+            }
+
+            append(data) {
+                const node = new Node(data);  
+                if (this.head == null) {
+                    this.head = this.tail = node;  
+                    this.head.prev = null;  
+                    this.tail.next = null;  
+                } 
+                else {
+                    this.tail.next = node;  
+                    node.prev = this.tail;  
+                    this.tail = node;  
+                    this.tail.next = null;  
+                }
+
+                this.length++;
+                return this;
+            }
+
+            get(pos) {
+                let i = 0, currentNode = this.head;
+                while (currentNode) {
+                    if (i === pos) return currentNode;
+                    currentNode = currentNode.next;
+                    i++;
+                }
+                return null;
+            }
+        }
+
+
+        const listaImaginilor = new LinkedList('');
+
+        for(let i = 1; i <= 5; i++) {
+            listaImaginilor.append(`./imgs/${i}.jpg`);
+        };
+
+        listaImaginilor.head.prev = listaImaginilor.tail;
+        listaImaginilor.tail.next = listaImaginilor.head;
+
+        var now = listaImaginilor.head;
+
+
+       window.addEventListener('load', () => {
+           // Imaginea de dinainte
+           imgsArr[0].src = listaImaginilor.head.prev.data;
+           imgsArr[0].classList.add('prev');
+
+           // Imaginea de acum
+           imgsArr[1].src = listaImaginilor.head.data;
+           imgsArr[1].classList.add('now');
+
+           // Imaginea urmatoare
+           imgsArr[2].src = listaImaginilor.head.next.data;
+           imgsArr[2].classList.add('next');
+
+           // Cerculete
+           cerculeteArr[0].style.backgroundColor = "black";
+       }) 
+
+       sageataDreapta.addEventListener('click', () => {
+           urmatoarea();
+           sageataDreapta.style.pointerEvents = "none";
+           setTimeout( () => {
+            sageataDreapta.style.pointerEvents = "all";    
+           }, 1000);
+      
+       })
+
+       sageataStanga.addEventListener('click', () => {
+            precedenta();
+            sageataStanga.style.pointerEvents = "none";
+            setTimeout( () => {
+                sageataStanga.style.pointerEvents = "all";    
+            }, 1000);
+
+       })
+
+       function urmatoarea() {
+            now = now.prev;
+            let [tmp0, tmp1, tmp2] = [...imgsArr];
+
+            tmp2.src = now.prev.data;
+            tmp2.className = 'prev';
+            tmp1.className = 'next moveOutRight';
+            tmp0.className = 'now moveToRight';
+
+            imgsArr[0] = tmp2;
+            imgsArr[1] = tmp0;
+            imgsArr[2] = tmp1;
+
+
+            cerculetIndex ++;
+            cerculetIndex = checkCerculet(cerculetIndex);
+            cerculeteArr[checkCerculet(cerculetIndex - 1)].style.backgroundColor = 'transparent';
+            cerculeteArr[checkCerculet(cerculetIndex - 1)].classList.remove('fade');
+            cerculeteArr[cerculetIndex].style.backgroundColor = 'black';
+            cerculeteArr[cerculetIndex].classList.add('fade');
+
+       }
+
+       function precedenta() {
+            now = now.next;
+            let [tmp0, tmp1, tmp2] = [...imgsArr];
+
+            tmp0.src = now.next.data;
+            tmp0.className = 'next';
+            tmp1.className = 'prev moveOutLeft';
+            tmp2.className = 'now moveToLeft';
+
+            imgsArr[0] = tmp1;
+            imgsArr[1] = tmp2;
+            imgsArr[2] = tmp0;
+
+            cerculetIndex --;
+            cerculetIndex = checkCerculet(cerculetIndex);
+            cerculeteArr[checkCerculet(cerculetIndex + 1)].style.backgroundColor = 'transparent';
+            cerculeteArr[checkCerculet(cerculetIndex + 1)].classList.remove('fade');
+            cerculeteArr[cerculetIndex].style.backgroundColor = 'black';
+            cerculeteArr[cerculetIndex].classList.add('fade');
+
+       }
+
+       function checkCerculet(index) {
+            if(index < 0)
+                return cerculeteArr.length - 1;
+            else if (index > cerculeteArr.length - 1)
+                return 0;
+            else 
+                return index;
+       }
+
+    </script>
+    
+</body>
+</html>
